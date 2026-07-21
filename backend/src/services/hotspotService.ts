@@ -13,6 +13,7 @@ import {
   calculateTrend,
   getPriorityLevel,
 } from './scoringService';
+import { resolveDistrictCoordinates } from './coordinateService';
 import { logger } from '../utils/logger';
 
 /**
@@ -70,19 +71,22 @@ export async function recalculateDistrict(
 
   const trend = calculateTrend(currentWeekCount, previousWeekCount);
 
-  // ── Score ─────────────────────────────────────────────────────
+  // ── Score & Coordinates ───────────────────────────────────────
   const reportCount    = agg?.reportCount ?? 0;
   const averageSeverity = agg?.avgSeverityNum ?? 1;
   const latestIncident  = agg?.latestIncident ?? null;
 
   const hotspotScore  = calculateHotspotScore(reportCount, averageSeverity, latestIncident);
   const priorityLevel = getPriorityLevel(hotspotScore);
+  const coords        = resolveDistrictCoordinates(district, state);
 
   // ── Upsert DistrictStats ──────────────────────────────────────
   const updated = await DistrictStats.findOneAndUpdate(
     { district, state },
     {
       $set: {
+        latitude:       coords.latitude,
+        longitude:      coords.longitude,
         reportCount,
         verifiedCount:  agg?.verifiedCount ?? 0,
         criticalCount:  agg?.criticalCount ?? 0,
@@ -94,7 +98,7 @@ export async function recalculateDistrict(
         lastCalculated: new Date(),
       },
     },
-    { new: true, upsert: false },
+    { returnDocument: 'after', upsert: true },
   );
 
   logger.info('Hotspot recalculated', {

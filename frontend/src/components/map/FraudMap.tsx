@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { MapMarker } from '../../types';
 
 interface FraudMapProps {
@@ -31,9 +32,28 @@ function getMarkerRadius(reportCount: number): number {
   return 10;
 }
 
-// India Bounding Box Validation (Latitude: 6° N to 38° N, Longitude: 68° E to 98° E)
-function isValidIndiaCoordinate(lat: number, lng: number): boolean {
-  return typeof lat === 'number' && typeof lng === 'number' && lat >= 6.0 && lat <= 38.0 && lng >= 68.0 && lng <= 98.0;
+/**
+ * Validates & autocorrects swapped lat/lng values for Indian geography.
+ * Bounds: 6° N <= Latitude <= 38° N, 68° E <= Longitude <= 98° E
+ */
+function validateAndCorrectCoordinate(rawLat: number, rawLng: number): { lat: number; lng: number; isValid: boolean } {
+  if (typeof rawLat !== 'number' || typeof rawLng !== 'number' || isNaN(rawLat) || isNaN(rawLng)) {
+    return { lat: 0, lng: 0, isValid: false };
+  }
+
+  let lat = rawLat;
+  let lng = rawLng;
+
+  // Detect and autocorrect swapped lat/lng (e.g. lat=77.5, lng=12.9)
+  if (lat > 50 && lng < 50) {
+    const temp = lat;
+    lat = lng;
+    lng = temp;
+  }
+
+  // Enforce geographical boundary check (6 <= lat <= 38, 68 <= lng <= 98)
+  const isValid = lat >= 6.0 && lat <= 38.0 && lng >= 68.0 && lng <= 98.0;
+  return { lat, lng, isValid };
 }
 
 export const FraudMap: React.FC<FraudMapProps> = ({
@@ -92,8 +112,21 @@ export const FraudMap: React.FC<FraudMapProps> = ({
     markerGroup.clearLayers();
     heatGroup.clearLayers();
 
-    // Filter valid India coordinates
-    const validMarkers = markers.filter((m) => isValidIndiaCoordinate(m.latitude, m.longitude));
+    // Map position registry for anti-overlap clustering offset
+    const positionCounts: Record<string, number> = {};
+
+    // Filter and process valid India coordinates
+    const validMarkers = markers
+      .map((m) => {
+        const check = validateAndCorrectCoordinate(m.latitude, m.longitude);
+        return {
+          ...m,
+          latitude: check.lat,
+          longitude: check.lng,
+          isValid: check.isValid,
+        };
+      })
+      .filter((m) => m.isValid);
 
     // 1. Render Markers Layer
     if (showMarkers) {
@@ -101,6 +134,21 @@ export const FraudMap: React.FC<FraudMapProps> = ({
         const color = getPriorityColor(m.hotspotScore);
         const radius = getMarkerRadius(m.reportCount);
         const isSelected = selectedDistrict?.district === m.district;
+
+        // Calculate anti-overlap slight offset if multiple markers share exact coordinate
+        const posKey = `${m.latitude.toFixed(3)},${m.longitude.toFixed(3)}`;
+        const count = positionCounts[posKey] || 0;
+        positionCounts[posKey] = count + 1;
+
+        let renderLat = m.latitude;
+        let renderLng = m.longitude;
+
+        if (count > 0) {
+          const angle = count * 0.8;
+          const offsetDist = 0.012 * Math.sqrt(count);
+          renderLat += offsetDist * Math.cos(angle);
+          renderLng += offsetDist * Math.sin(angle);
+        }
 
         const isHighRisk = m.hotspotScore > 60;
         const iconHtml = `
@@ -136,21 +184,25 @@ export const FraudMap: React.FC<FraudMapProps> = ({
           iconAnchor: [radius, radius],
         });
 
-        const marker = L.marker([m.latitude, m.longitude], { icon });
+        const marker = L.marker([renderLat, renderLng], { icon });
         const priorityLabel = getPriorityLabel(m.hotspotScore);
 
-        marker.bindTooltip(
-          `
-            <div style="font-family: 'IBM Plex Sans'; padding: 4px 6px;">
-              <div style="font-weight: bold; font-size: 12px;">${m.district}, ${m.state}</div>
-              <div style="font-size: 11px; color: ${color}; font-weight: 600;">
-                Score: ${m.hotspotScore}/100 (${priorityLabel})
-              </div>
-              <div style="font-size: 10px; color: #94A3B8;">${m.reportCount} incidents reported</div>
+        const popupHtml = `
+          <div style="font-family: sans-serif; padding: 4px; color: #F8FAFC;">
+            <strong style="font-size: 14px; color: #F8FAFC; display: block; margin-bottom: 2px;">${m.district}</strong>
+            <span style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 6px;">${m.state}</span>
+            <div style="display: flex; items-center; justify-content: space-between; gap: 8px; font-size: 11px; font-family: monospace;">
+              <span>Score: <strong style="color: ${color};">${m.hotspotScore}/100</strong></span>
+              <span>Reports: <strong>${m.reportCount}</strong></span>
             </div>
-          `,
-          { direction: 'top', offset: [0, -radius] }
-        );
+          </div>
+        `;
+
+        marker.bindPopup(popupHtml, {
+          className: 'custom-leaflet-popup',
+          closeButton: false,
+          maxWidth: 260,
+        });
 
         marker.on('click', () => {
           onSelectDistrict(m);
@@ -160,21 +212,35 @@ export const FraudMap: React.FC<FraudMapProps> = ({
       });
     }
 
-    // 2. Render Heatmap Layer
+    // 2. Render Heatmap Layer using corrected coordinates
     if (showHeatmap) {
       validMarkers.forEach((m) => {
         const color = getPriorityColor(m.hotspotScore);
-        const heatCircle = L.circle([m.latitude, m.longitude], {
-          radius: m.hotspotScore * 800,
+        const radius = Math.max(25, (m.hotspotScore / 100) * 60);
+
+        const circle = L.circle([m.latitude, m.longitude], {
+          radius: radius * 1000,
           color: color,
           fillColor: color,
-          fillOpacity: 0.25,
-          stroke: false,
+          fillOpacity: 0.18,
+          weight: 1,
         });
-        heatGroup.addLayer(heatCircle);
+
+        heatGroup.addLayer(circle);
       });
     }
-  }, [markers, selectedDistrict, showMarkers, showHeatmap, onSelectDistrict]);
+  }, [markers, selectedDistrict, onSelectDistrict, showMarkers, showHeatmap]);
+
+  // ── Fly To Selected District ──────────────────────────────────
+  useEffect(() => {
+    if (!mapRef.current || !selectedDistrict) return;
+    const check = validateAndCorrectCoordinate(selectedDistrict.latitude, selectedDistrict.longitude);
+    if (check.isValid) {
+      mapRef.current.flyTo([check.lat, check.lng], 8, {
+        duration: 1.5,
+      });
+    }
+  }, [selectedDistrict]);
 
   return (
     <div className="relative w-full h-full">

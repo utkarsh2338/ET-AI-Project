@@ -9,6 +9,7 @@ import crypto from 'crypto';
 import { Report, IReport } from '../models/Report';
 import { DistrictStats } from '../models/DistrictStats';
 import { recalculateDistrict } from './hotspotService';
+import { resolveDistrictCoordinates } from './coordinateService';
 import { generateRecommendation } from './geminiCommandService';
 import { broadcastNewReport, broadcastHotspotUpdate } from './socketService';
 import { logger } from '../utils/logger';
@@ -83,10 +84,14 @@ export async function createReport(dto: CreateReportDTO): Promise<IReport> {
     });
   }
 
-  // ── Persist ───────────────────────────────────────────────────
+  // ── Persist & Resolve Coordinates ──────────────────────────────
+  const coords = resolveDistrictCoordinates(dto.district, dto.state, dto.latitude, dto.longitude);
+
   const report = new Report({
     reportId: generateReportId(),
     ...dto,
+    latitude: coords.latitude,
+    longitude: coords.longitude,
     timestamp: new Date(),
     status: 'Pending',
     source: dto.source ?? 'Citizen',

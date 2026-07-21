@@ -24,6 +24,7 @@ import { config } from '../config/env';
 import { Report } from '../models/Report';
 import { District } from '../models/District';
 import { recalculateDistrict } from '../services/hotspotService';
+import { resolveDistrictCoordinates } from '../services/coordinateService';
 
 const CLEAR = process.argv.includes('--clear');
 const datasetDir = path.resolve(__dirname, '../dataset');
@@ -268,12 +269,8 @@ export async function runImport(): Promise<{
       continue;
     }
 
-    // Validation 4: Coordinates
-    if (isNaN(lat) || isNaN(lng) || lat < 6 || lat > 38 || lng < 68 || lng > 98) {
-      invalidRows++;
-      console.warn(`  ⚠️ [I4C Row ${line}] Skipped: Out-of-bounds coordinates (${lat}, ${lng})`);
-      continue;
-    }
+    // Validation 4: Coordinates (Resolved against Single Source of Truth)
+    const resolvedCoords = resolveDistrictCoordinates(d, s, lat, lng);
 
     // Deduplication check by reportId
     const existingById = await Report.findOne({ reportId });
@@ -299,8 +296,8 @@ export async function runImport(): Promise<{
       category,
       district: d,
       state: s,
-      latitude: lat,
-      longitude: lng,
+      latitude: resolvedCoords.latitude,
+      longitude: resolvedCoords.longitude,
       timestamp,
       severity,
       status: 'Verified',
@@ -355,15 +352,8 @@ export async function runImport(): Promise<{
       continue;
     }
 
-    // Validation 4: Coordinates (Lookup from district_coordinates.csv)
-    const coordKey = `${d.toLowerCase()}|${s.toLowerCase()}`;
-    const coordMatch = coordLookup.get(coordKey) || coordLookup.get(d.toLowerCase());
-
-    if (!coordMatch) {
-      invalidRows++;
-      console.warn(`  ⚠️ [JSON Item ${line}] Skipped: District "${d}, ${s}" not found in coordinates lookup`);
-      continue;
-    }
+    // Validation 4: Coordinates (Lookup from district_coordinates.csv benchmark)
+    const jsonCoords = resolveDistrictCoordinates(d, s, r.latitude, r.longitude);
 
     // Deduplication check by contentHash
     const contentHash = generateContentHash(d, `${title} ${desc}`);
@@ -383,8 +373,8 @@ export async function runImport(): Promise<{
       category,
       district: d,
       state: s,
-      latitude: coordMatch.lat,
-      longitude: coordMatch.lng,
+      latitude: jsonCoords.latitude,
+      longitude: jsonCoords.longitude,
       timestamp,
       severity,
       status: 'Pending',
