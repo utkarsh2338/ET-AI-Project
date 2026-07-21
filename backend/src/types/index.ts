@@ -117,7 +117,7 @@ export interface ExtractedFeatures {
 export type RiskLevel = 'Low' | 'Medium' | 'High' | 'Critical';
 
 /** Verdict from the Gemini reasoning layer */
-export type Verdict = 'Scam' | 'Legitimate';
+export type Verdict = 'Scam' | 'Likely Scam' | 'Needs Manual Review' | 'Unable to Determine' | 'Safe' | 'Legitimate';
 
 /** Structured response from Gemini API */
 export interface GeminiAnalysisResult {

@@ -47,9 +47,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ currentView }) => 
     <div className="flex-1 flex flex-col overflow-hidden bg-graphite-950">
       {/* View 1: Main Geospatial Live Monitor Map */}
       {currentView === 'overview' && (
-        <div className="flex-1 flex flex-col overflow-hidden p-4 space-y-4">
+        <div className="flex-1 flex flex-col overflow-y-auto lg:overflow-hidden p-4 space-y-4">
           {/* Top KPI Stat Cards Grid */}
-          <div className="grid grid-cols-4 gap-4 shrink-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
             <StatCard
               title="Total Incidents"
               value={summary?.totalReports ?? 0}
@@ -80,9 +80,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ currentView }) => 
           </div>
 
           {/* Main 3-Column Workspace */}
-          <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
             {/* Left 3 cols: Hotspots List */}
-            <div className="col-span-3 h-full min-h-0">
+            <div className="col-span-1 lg:col-span-3 h-72 lg:h-full min-h-0">
               <HotspotList
                 markers={markers}
                 onSelectDistrict={setSelectedDistrict}
@@ -91,7 +91,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ currentView }) => 
             </div>
 
             {/* Middle 6 cols: Geospatial Map Canvas */}
-            <div className="col-span-6 h-full min-h-0 relative bg-graphite-900 border border-graphite-700 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="col-span-1 lg:col-span-6 h-96 lg:h-full min-h-0 relative bg-graphite-900 border border-graphite-700 rounded-2xl overflow-hidden shadow-2xl">
               <MapToolbar
                 showMarkers={showMarkers}
                 setShowMarkers={setShowMarkers}
@@ -114,7 +114,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ currentView }) => 
             </div>
 
             {/* Right 3 cols: Live Socket.IO Incident Stream */}
-            <div className="col-span-3 h-full min-h-0">
+            <div className="col-span-1 lg:col-span-3 h-72 lg:h-full min-h-0">
               <LiveFeed events={recentEvents} />
             </div>
           </div>
@@ -133,7 +133,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ currentView }) => 
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {markers.map((m) => (
               <div
                 key={m.district}
@@ -172,7 +172,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ currentView }) => 
             <p className="text-xs font-mono text-slate-400">Statistical aggregation derived from national citizen report data</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ReportsOverTime data={analytics.reportsOverTime} />
             <CategoryPie data={analytics.categoryDistribution} />
           </div>

@@ -27,8 +27,13 @@ function getPriorityLabel(score: number): string {
 function getMarkerRadius(reportCount: number): number {
   if (reportCount > 300) return 22;
   if (reportCount > 150) return 18;
-  if (reportCount > 50)  return 14;
+  if (reportCount > 50) return 14;
   return 10;
+}
+
+// India Bounding Box Validation (Latitude: 6° N to 38° N, Longitude: 68° E to 98° E)
+function isValidIndiaCoordinate(lat: number, lng: number): boolean {
+  return typeof lat === 'number' && typeof lng === 'number' && lat >= 6.0 && lat <= 38.0 && lng >= 68.0 && lng <= 98.0;
 }
 
 export const FraudMap: React.FC<FraudMapProps> = ({
@@ -40,8 +45,8 @@ export const FraudMap: React.FC<FraudMapProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const layerGroupRef = useRef<L.LayerGroup | null>(null);
-  const heatmapLayerRef = useRef<any>(null);
+  const markerGroupRef = useRef<L.LayerGroup | null>(null);
+  const heatGroupRef = useRef<L.LayerGroup | null>(null);
 
   // ── Initialize Leaflet Map ────────────────────────────────────
   useEffect(() => {
@@ -67,7 +72,8 @@ export const FraudMap: React.FC<FraudMapProps> = ({
     // Zoom control at bottom right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    layerGroupRef.current = L.layerGroup().addTo(map);
+    markerGroupRef.current = L.layerGroup().addTo(map);
+    heatGroupRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
 
     return () => {
@@ -79,19 +85,23 @@ export const FraudMap: React.FC<FraudMapProps> = ({
   // ── Update Markers and Heatmap ────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
-    const layerGroup = layerGroupRef.current;
-    if (!map || !layerGroup) return;
+    const markerGroup = markerGroupRef.current;
+    const heatGroup = heatGroupRef.current;
+    if (!map || !markerGroup || !heatGroup) return;
 
-    layerGroup.clearLayers();
+    markerGroup.clearLayers();
+    heatGroup.clearLayers();
 
-    // 1. Render Markers
+    // Filter valid India coordinates
+    const validMarkers = markers.filter((m) => isValidIndiaCoordinate(m.latitude, m.longitude));
+
+    // 1. Render Markers Layer
     if (showMarkers) {
-      markers.forEach((m) => {
+      validMarkers.forEach((m) => {
         const color = getPriorityColor(m.hotspotScore);
         const radius = getMarkerRadius(m.reportCount);
         const isSelected = selectedDistrict?.district === m.district;
 
-        // Custom HTML marker icon with pulse ring effect for high/critical score
         const isHighRisk = m.hotspotScore > 60;
         const iconHtml = `
           <div style="position: relative; width: ${radius * 2}px; height: ${radius * 2}px; display: flex; align-items: center; justify-content: center;">
@@ -127,9 +137,8 @@ export const FraudMap: React.FC<FraudMapProps> = ({
         });
 
         const marker = L.marker([m.latitude, m.longitude], { icon });
-
-        // Tooltip hover
         const priorityLabel = getPriorityLabel(m.hotspotScore);
+
         marker.bindTooltip(
           `
             <div style="font-family: 'IBM Plex Sans'; padding: 4px 6px;">
@@ -147,40 +156,23 @@ export const FraudMap: React.FC<FraudMapProps> = ({
           onSelectDistrict(m);
         });
 
-        layerGroup.addLayer(marker);
+        markerGroup.addLayer(marker);
       });
     }
 
     // 2. Render Heatmap Layer
-    if (showHeatmap && (window as any).L && (window as any).L.heatLayer) {
-      if (heatmapLayerRef.current) {
-        map.removeLayer(heatmapLayerRef.current);
-        heatmapLayerRef.current = null;
-      }
-
-      const heatData = markers.map((m) => [
-        m.latitude,
-        m.longitude,
-        m.hotspotScore / 100, // intensity 0..1
-      ]);
-
-      const heat = (window as any).L.heatLayer(heatData, {
-        radius: 35,
-        blur: 25,
-        maxZoom: 10,
-        gradient: {
-          0.2: '#10B981',
-          0.5: '#F59E0B',
-          0.8: '#F97316',
-          1.0: '#EF4444',
-        },
+    if (showHeatmap) {
+      validMarkers.forEach((m) => {
+        const color = getPriorityColor(m.hotspotScore);
+        const heatCircle = L.circle([m.latitude, m.longitude], {
+          radius: m.hotspotScore * 800,
+          color: color,
+          fillColor: color,
+          fillOpacity: 0.25,
+          stroke: false,
+        });
+        heatGroup.addLayer(heatCircle);
       });
-
-      heat.addTo(map);
-      heatmapLayerRef.current = heat;
-    } else if (!showHeatmap && heatmapLayerRef.current) {
-      map.removeLayer(heatmapLayerRef.current);
-      heatmapLayerRef.current = null;
     }
   }, [markers, selectedDistrict, showMarkers, showHeatmap, onSelectDistrict]);
 

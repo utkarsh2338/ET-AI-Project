@@ -72,6 +72,38 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const root = document.documentElement;
 
+    // Theme switching
+    const applyTheme = (theme: 'dark' | 'light' | 'system') => {
+      let isDark = true;
+      if (theme === 'dark') {
+        isDark = true;
+      } else if (theme === 'light') {
+        isDark = false;
+      } else if (theme === 'system') {
+        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      if (isDark) {
+        root.classList.add('dark');
+        root.classList.remove('light');
+      } else {
+        root.classList.remove('dark');
+        root.classList.add('light');
+      }
+    };
+
+    applyTheme(settings.theme);
+
+    // Listen for OS theme changes if theme === 'system'
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = () => {
+      if (settings.theme === 'system') {
+        applyTheme('system');
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+
     // Font size
     root.classList.remove('text-size-small', 'text-size-medium', 'text-size-large');
     root.classList.add(`text-size-${settings.fontSize}`);
@@ -83,6 +115,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Reduced Motion
     if (settings.reducedMotion) root.classList.add('reduced-motion');
     else root.classList.remove('reduced-motion');
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    };
   }, [settings]);
 
   return (

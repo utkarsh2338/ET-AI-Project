@@ -24,6 +24,7 @@ import {
   FileCheck,
   Mic,
   MicOff,
+  Square,
   Sparkles as SparkleIcon,
 } from 'lucide-react';
 import { analyzeScamText, translateAnalysis } from '../lib/api';
@@ -166,17 +167,7 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
     showToast({ type: 'info', title: 'Chat Cleared', message: 'Current conversation history reset.' });
   }
 
-  function handleSpeakText(text: string) {
-    if (!('speechSynthesis' in window)) {
-      showToast({ type: 'warning', title: 'Speech Unavailable', message: 'Text-to-speech is not supported by your browser.' });
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === 'hi' ? 'hi-IN' : language === 'ta' ? 'ta-IN' : 'en-US';
-    window.speechSynthesis.speak(utterance);
-    showToast({ type: 'info', title: 'Reading Aloud', message: 'Playing audio explanation...' });
-  }
+
 
   function handleDownloadJSON(msg: ChatMessage) {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(msg, null, 2));
@@ -302,7 +293,9 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
           if (s.id === activeSession.id) {
             return {
               ...s,
-              messages: s.messages.map((m) => (m.id === msgId ? { ...m, currentLanguage: 'en' } : m)),
+              messages: s.messages.map((m) =>
+                m.id === msgId ? { ...m, currentLanguage: 'en', translatedResult: undefined, isTranslating: false } : m,
+              ),
             };
           }
           return s;
@@ -350,7 +343,12 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
               ...s,
               messages: s.messages.map((m) =>
                 m.id === msgId
-                  ? { ...m, translatedResult: translatedRes, currentLanguage: targetLang, isTranslating: false }
+                  ? {
+                      ...m,
+                      translatedResult: translatedRes,
+                      currentLanguage: targetLang,
+                      isTranslating: false,
+                    }
                   : m,
               ),
             };
@@ -521,8 +519,8 @@ Explanation: ${result?.explanation || 'N/A'}`;
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {activeSession?.messages.map((msg) => {
             const isUser = msg.role === 'user';
-            const displayResult = msg.translatedResult || msg.result;
             const currentLang = msg.currentLanguage || 'en';
+            const displayResult = currentLang === 'en' ? msg.result : (msg.translatedResult || msg.result);
 
             return (
               <div
@@ -770,15 +768,42 @@ Explanation: ${result?.explanation || 'N/A'}`;
                         </button>
                       </div>
 
-                      {/* Listen / TTS Button */}
-                      <button
-                        onClick={() => handleSpeakText(displayResult?.explanation || msg.text)}
-                        className="px-2.5 py-1 bg-graphite-900 border border-graphite-700 hover:bg-graphite-800 text-brand-gold rounded-lg flex items-center space-x-1 transition-colors"
-                        title="Read Explanation Aloud (Text-to-Speech)"
-                      >
-                        <Volume2 className="w-3 h-3 text-brand-gold" />
-                        <span>{t('listen')}</span>
-                      </button>
+                      {/* Listen / Stop TTS Toggle Button */}
+                      {(() => {
+                        const textToSpeak = displayResult?.explanation || msg.text;
+                        const msgLang = currentLang || displayResult?.language || language;
+                        const isThisSpeaking = isPlaying && activeText === textToSpeak;
+
+                        return (
+                          <button
+                            onClick={() => {
+                              if (isThisSpeaking) {
+                                stopAudio();
+                              } else {
+                                playText(textToSpeak, msgLang);
+                              }
+                            }}
+                            className={`px-2.5 py-1 bg-graphite-900 border rounded-lg flex items-center space-x-1 transition-all ${
+                              isThisSpeaking
+                                ? 'border-signal-red text-signal-red animate-pulse bg-signal-red/10'
+                                : 'border-graphite-700 hover:bg-graphite-800 text-brand-gold'
+                            }`}
+                            title={isThisSpeaking ? 'Stop Reading' : 'Read Explanation Aloud (Text-to-Speech)'}
+                          >
+                            {isThisSpeaking ? (
+                              <>
+                                <Square className="w-3 h-3 fill-signal-red text-signal-red" />
+                                <span>Stop</span>
+                              </>
+                            ) : (
+                              <>
+                                <Volume2 className="w-3 h-3 text-brand-gold" />
+                                <span>{t('listen')}</span>
+                              </>
+                            )}
+                          </button>
+                        );
+                      })()}
 
                       {/* Download Report JSON */}
                       <button

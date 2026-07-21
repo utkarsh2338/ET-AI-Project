@@ -80,7 +80,14 @@ Respond with valid JSON only.`;
 }
 
 
-const VALID_VERDICTS: readonly Verdict[] = ['Scam', 'Legitimate'];
+const VALID_VERDICTS: readonly Verdict[] = [
+  'Scam',
+  'Likely Scam',
+  'Needs Manual Review',
+  'Unable to Determine',
+  'Safe',
+  'Legitimate',
+];
 const VALID_RISK_LEVELS: readonly RiskLevel[] = ['Low', 'Medium', 'High', 'Critical'];
 
 function validateGeminiResponse(raw: unknown): GeminiAnalysisResult {

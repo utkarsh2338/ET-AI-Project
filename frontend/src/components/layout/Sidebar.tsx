@@ -29,14 +29,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-64'} bg-graphite-900 border-r border-graphite-700 flex flex-col justify-between shrink-0 z-20 transition-all duration-300 relative select-none`}>
+    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-graphite-900 border-r border-graphite-700 flex flex-col justify-between shrink-0 z-20 transition-all duration-300 relative select-none`}>
       {/* Collapse Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="absolute -right-3 top-5 w-6 h-6 bg-graphite-850 border border-graphite-700 rounded-full flex items-center justify-center text-slate-400 hover:text-white shadow-md z-30"
         title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
       >
-        {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+        {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
       </button>
 
       {/* Upper Navigation Section */}
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     : 'text-slate-400 hover:text-slate-200 hover:bg-graphite-850/50'
                 } ${isCollapsed ? 'justify-center px-0' : ''}`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-brand-gold' : 'text-slate-400'}`} />
+                <Icon className={`${isCollapsed ? 'w-6 h-6' : 'w-4 h-4'} ${isActive ? 'text-brand-gold' : 'text-slate-400'} shrink-0`} />
                 {!isCollapsed && <span>{item.label}</span>}
               </button>
             );
