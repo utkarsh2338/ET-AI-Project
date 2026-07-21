@@ -4,7 +4,7 @@ import { getAllHotspots } from '../services/hotspotService';
 import { sendSuccess } from '../utils/responseFormatter';
 
 export async function handleGetDashboard(
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
@@ -21,7 +21,7 @@ export async function handleGetDashboard(
 }
 
 export async function handleGetHotspots(
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
@@ -34,7 +34,7 @@ export async function handleGetHotspots(
 }
 
 export async function handleGetMarkers(
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
