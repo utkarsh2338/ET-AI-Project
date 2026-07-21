@@ -16,9 +16,10 @@ export function createApp(): Application {
 
   // ── CORS ──
   app.use(cors({
-    origin: config.isDevelopment ? '*' : process.env['ALLOWED_ORIGINS']?.split(',') ?? [],
-    methods: ['GET', 'POST'],
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   }));
 
   app.use(express.json({ limit: '1mb' }));

@@ -1,6 +1,7 @@
 import { DashboardSummary, MapMarker, AnalyticsData, Report, DistrictDetail, FilterState } from '../types';
 
-const API_BASE = '/api';
+const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://et-ai-project.onrender.com');
+const API_BASE = `${BACKEND_URL}/api`;
 
 export async function fetchDashboard(): Promise<{
   summary: DashboardSummary;
