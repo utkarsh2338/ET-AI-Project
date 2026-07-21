@@ -157,27 +157,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         )}
 
-        {/* Connection Indicator Status (🟢 Connected / 🟡 Reconnecting... / 🔴 Offline) */}
+        {/* Connection Indicator Status (🟢 Online in Green) */}
         <div className="flex items-center space-x-2 bg-graphite-950 border border-graphite-700 px-3 py-1.5 rounded-lg text-xs font-mono">
           <div className="relative flex items-center justify-center w-2.5 h-2.5">
-            <span
-              className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                isConnected ? 'bg-signal-green animate-ping' : 'bg-signal-red'
-              }`}
-            />
-            <span
-              className={`relative inline-flex rounded-full h-2 w-2 ${
-                isConnected ? 'bg-signal-green' : 'bg-signal-red'
-              }`}
-            />
+            <span className="absolute inline-flex h-full w-full rounded-full opacity-75 bg-signal-green animate-ping" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-signal-green" />
           </div>
-          <span className={isConnected ? 'text-signal-green font-medium' : 'text-signal-red'}>
-            {isConnected ? `🟢 ${t('liveFeed')}` : `🔴 ${t('offline')}`}
+          <span className="text-signal-green font-medium font-mono">
+            🟢 Online
           </span>
           <span className="text-slate-500">|</span>
           <span className="text-slate-400 flex items-center space-x-1">
-            <Radio className="w-3 h-3 text-slate-400 inline" />
-            <span>{liveConnections} Active</span>
+            <Radio className="w-3 h-3 text-signal-green inline" />
+            <span>{liveConnections || 1} Active</span>
           </span>
         </div>
       </div>
