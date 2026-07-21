@@ -9,6 +9,7 @@ interface SidebarProps {
   onOpenReportModal: () => void;
   onOpenSettings?: () => void;
   onOpenShortcuts?: () => void;
+  isConnected?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -17,6 +18,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenReportModal,
   onOpenSettings,
   onOpenShortcuts,
+  isConnected = true,
 }) => {
   const { t } = useI18n();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -55,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         {/* System Health Widget */}
-        {!isCollapsed && <SystemHealthWidget isConnected={true} />}
+        {!isCollapsed && <SystemHealthWidget isConnected={isConnected} />}
 
         {/* Action Button: Citizen Report */}
         <button

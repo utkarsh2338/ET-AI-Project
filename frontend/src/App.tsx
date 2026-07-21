@@ -139,6 +139,7 @@ export const App: React.FC = () => {
         {/* Left Sidebar */}
         <Sidebar
           currentView={currentView}
+          isConnected={isConnected}
           onSelectView={(view) => {
             if (view === 'timeline') {
               setActiveTab('timeline');

@@ -9,9 +9,11 @@ const SOCKET_URL =
 export function getSocket(): Socket {
   if (!socket) {
     socket = io(SOCKET_URL, {
+      transports: ['polling', 'websocket'],
       autoConnect: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 2000,
+      reconnectionAttempts: 25,
+      reconnectionDelay: 1000,
+      withCredentials: true,
     });
   }
   return socket;

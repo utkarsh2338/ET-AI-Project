@@ -27,12 +27,8 @@ export function useSocket(
   useEffect(() => {
     const socket = getSocket();
 
-    function handleConnect() {
-      setIsConnected(true);
-    }
-
-    function handleDisconnect() {
-      setIsConnected(false);
+    function updateStatus() {
+      setIsConnected(socket.connected);
     }
 
     function handleConnectionCount(data: { count: number }) {
@@ -48,17 +44,22 @@ export function useSocket(
       if (onHotspotUpdate) onHotspotUpdate(event);
     }
 
-    socket.on('connect', handleConnect);
-    socket.on('disconnect', handleDisconnect);
+    socket.on('connect', updateStatus);
+    socket.on('disconnect', updateStatus);
+    socket.on('connect_error', updateStatus);
     socket.on('CONNECTION_COUNT', handleConnectionCount);
     socket.on('NEW_REPORT', handleNewReport);
     socket.on('HOTSPOT_UPDATE', handleHotspotUpdate);
 
-    setIsConnected(socket.connected);
+    // Initial check & interval backup for async connection state changes
+    updateStatus();
+    const interval = setInterval(updateStatus, 1500);
 
     return () => {
-      socket.off('connect', handleConnect);
-      socket.off('disconnect', handleDisconnect);
+      clearInterval(interval);
+      socket.off('connect', updateStatus);
+      socket.off('disconnect', updateStatus);
+      socket.off('connect_error', updateStatus);
       socket.off('CONNECTION_COUNT', handleConnectionCount);
       socket.off('NEW_REPORT', handleNewReport);
       socket.off('HOTSPOT_UPDATE', handleHotspotUpdate);
