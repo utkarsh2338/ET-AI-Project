@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
@@ -7,25 +8,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Command Center (Dark Mode) Graphite Theme
+        // Theme-aware Graphite Colors via CSS variables
         graphite: {
-          950: '#0B0D11',
-          900: '#14181F', // Main command center background
-          850: '#1A202A', // Panel background
-          800: '#222A36', // Card background
-          700: '#2E3848', // Border / Divider
-          600: '#425066', // Subtle text / icon
+          950: 'rgb(var(--c-graphite-950) / <alpha-value>)',
+          900: 'rgb(var(--c-graphite-900) / <alpha-value>)',
+          850: 'rgb(var(--c-graphite-850) / <alpha-value>)',
+          800: 'rgb(var(--c-graphite-800) / <alpha-value>)',
+          700: 'rgb(var(--c-graphite-700) / <alpha-value>)',
+          600: 'rgb(var(--c-graphite-600) / <alpha-value>)',
           500: '#64748B',
         },
-        // Signal Colors
-        signal: {
-          green:  '#10B981', // Low risk / safe
-          amber:  '#F59E0B', // Medium risk / warning
-          orange: '#F97316', // High risk
-          red:    '#EF4444', // Critical risk
-          purple: '#8B5CF6', // Impersonation / Network node
+        // Theme-aware Slate Colors via CSS variables
+        slate: {
+          100: 'rgb(var(--c-slate-100) / <alpha-value>)',
+          200: 'rgb(var(--c-slate-200) / <alpha-value>)',
+          300: 'rgb(var(--c-slate-300) / <alpha-value>)',
+          400: 'rgb(var(--c-slate-400) / <alpha-value>)',
+          500: 'rgb(var(--c-slate-500) / <alpha-value>)',
         },
-        // Brand & Accent
+        // Signal Colors (Vibrant in both Dark & Light themes)
+        signal: {
+          green:  '#10B981',
+          amber:  '#F59E0B',
+          orange: '#F97316',
+          red:    '#EF4444',
+          purple: '#8B5CF6',
+        },
+        // Brand & Accent Colors
         brand: {
           indigo: '#4F378A',
           purple: '#6750A4',

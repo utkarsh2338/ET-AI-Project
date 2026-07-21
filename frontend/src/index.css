@@ -2,9 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* ☀️ Light Mode RGB Theme Tokens (Modern Government Dashboard: Crisp white, soft gray, indigo accent) */
+  --c-graphite-950: 241 245 249;  /* #F1F5F9 - Outer application background */
+  --c-graphite-900: 255 255 255;  /* #FFFFFF - Main panels, Navbar, Sidebar, Modals */
+  --c-graphite-850: 248 250 252;  /* #F8FAFC - Cards & Container blocks */
+  --c-graphite-800: 241 245 249;  /* #F1F5F9 - Elevated cards, Inputs, Selects */
+  --c-graphite-700: 226 232 240;  /* #E2E8F0 - Primary Borders & Dividers */
+  --c-graphite-600: 203 213 225;  /* #CBD5E1 - Secondary Dividers */
+
+  --c-slate-100: 15 23 42;       /* #0F172A - Main dark heading text */
+  --c-slate-200: 30 41 59;       /* #1E293B - Secondary dark text */
+  --c-slate-300: 51 65 85;       /* #334155 - Body text */
+  --c-slate-400: 100 116 139;    /* #64748B - Muted labels & icons */
+  --c-slate-500: 148 163 184;    /* #94A3B8 */
+
+  --leaflet-bg: #E2E8F0;
+}
+
+html.dark {
+  /* 🌙 Dark Mode RGB Theme Tokens (Cyber-security Command Center Graphite Theme) */
+  --c-graphite-950: 11 13 17;     /* #0B0D11 - Outer application background */
+  --c-graphite-900: 20 24 31;     /* #14181F - Main panels, Navbar, Sidebar, Modals */
+  --c-graphite-850: 26 32 42;     /* #1A202A - Cards & Container blocks */
+  --c-graphite-800: 34 42 54;     /* #222A36 - Elevated cards, Inputs, Selects */
+  --c-graphite-700: 46 56 72;     /* #2E3848 - Primary Borders & Dividers */
+  --c-graphite-600: 66 80 102;    /* #425066 - Secondary Dividers */
+
+  --c-slate-100: 248 250 252;    /* #F8FAFC - Main light heading text */
+  --c-slate-200: 226 232 240;    /* #E2E8F0 - Secondary light text */
+  --c-slate-300: 203 213 225;    /* #CBD5E1 - Body text */
+  --c-slate-400: 148 163 184;    /* #94A3B8 - Muted labels & icons */
+  --c-slate-500: 100 116 139;    /* #64748B */
+
+  --leaflet-bg: #0B0D11;
+}
+
 @layer base {
   body {
     @apply bg-graphite-950 text-slate-100 font-sans;
+    transition: background-color 250ms ease-in-out, color 250ms ease-in-out;
+  }
+
+  /* Smooth color transitions for UI elements */
+  div, header, aside, nav, main, section, button, input, select, textarea {
+    transition: background-color 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out;
   }
 }
 
@@ -27,56 +69,56 @@
   animation: pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
-/* Custom Scrollbar for Command Center Panels */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #14181F;
+  background: rgb(var(--c-graphite-900));
 }
 ::-webkit-scrollbar-thumb {
-  background: #2E3848;
+  background: rgb(var(--c-graphite-700));
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #425066;
+  background: rgb(var(--c-graphite-600));
 }
 
-/* Leaflet Dark Theme Overrides */
+/* Leaflet Map Theme Overrides */
 .leaflet-container {
-  background: #0B0D11 !important;
+  background: var(--leaflet-bg) !important;
   font-family: 'IBM Plex Sans', sans-serif !important;
 }
 
 .leaflet-control-zoom {
-  border: 1px solid #2E3848 !important;
+  border: 1px solid rgb(var(--c-graphite-700)) !important;
   box-shadow: none !important;
 }
 
 .leaflet-control-zoom a {
-  background-color: #1A202A !important;
-  color: #E2E8F0 !important;
-  border-bottom: 1px solid #2E3848 !important;
+  background-color: rgb(var(--c-graphite-850)) !important;
+  color: rgb(var(--c-slate-200)) !important;
+  border-bottom: 1px solid rgb(var(--c-graphite-700)) !important;
 }
 
 .leaflet-control-zoom a:hover {
-  background-color: #222A36 !important;
-  color: #FFFFFF !important;
+  background-color: rgb(var(--c-graphite-800)) !important;
+  color: rgb(var(--c-slate-100)) !important;
 }
 
 .leaflet-popup-content-wrapper {
-  background: #1A202A !important;
-  color: #E2E8F0 !important;
-  border: 1px solid #2E3848 !important;
+  background: rgb(var(--c-graphite-850)) !important;
+  color: rgb(var(--c-slate-200)) !important;
+  border: 1px solid rgb(var(--c-graphite-700)) !important;
   border-radius: 12px !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
   padding: 0 !important;
 }
 
 .leaflet-popup-tip {
-  background: #1A202A !important;
-  border: 1px solid #2E3848 !important;
+  background: rgb(var(--c-graphite-850)) !important;
+  border: 1px solid rgb(var(--c-graphite-700)) !important;
 }
 
 .leaflet-popup-content {
