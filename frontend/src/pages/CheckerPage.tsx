@@ -17,10 +17,25 @@ import {
   Clock,
   ArrowRight,
   CheckCircle2,
+  Volume2,
+  ThumbsUp,
+  ThumbsDown,
+  Download,
+  FileCheck,
+  Mic,
+  MicOff,
+  Sparkles as SparkleIcon,
 } from 'lucide-react';
 import { analyzeScamText, translateAnalysis } from '../lib/api';
 import { ChatMessage, ChatSession, ChatMessageResult, PrefillReportData } from '../types';
 import { showToast } from '../hooks/useToast';
+import { ExplainabilityPanel } from '../components/explainability/ExplainabilityPanel';
+import { useI18n } from '../context/I18nContext';
+import { useSettings } from '../context/SettingsContext';
+import { useVoiceInput } from '../hooks/useVoiceInput';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import { exportAnalysisAsJSON, exportAnalysisAsTXT, exportAnalysisAsPDF, generateOfficialCyberCrimeReport } from '../lib/reportExporter';
+import { ExplainabilityDashboard } from '../components/explainability/ExplainabilityDashboard';
 
 interface CheckerPageProps {
   onOpenReportModalWithData?: (data: PrefillReportData) => void;
@@ -28,44 +43,72 @@ interface CheckerPageProps {
 
 const STORAGE_KEY = 'cfs_chat_sessions';
 
-function getInitialSessions(): ChatSession[] {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch (e) {
-    console.error('Failed to load chat history:', e);
+export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithData }) => {
+  const { language, setLanguage, t } = useI18n();
+  const { settings } = useSettings();
+
+  function getInitialSessions(): ChatSession[] {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+
+    const defaultSessionId = `session-${Date.now()}`;
+    return [
+      {
+        id: defaultSessionId,
+        title: t('newChat'),
+        messages: [
+          {
+            id: `msg-welcome`,
+            role: 'assistant',
+            text: t('welcomeMessage'),
+            timestamp: new Date().toISOString(),
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
   }
 
-  const defaultSessionId = `session-${Date.now()}`;
-  return [
-    {
-      id: defaultSessionId,
-      title: 'Scam Analysis Session',
-      messages: [
-        {
-          id: `msg-welcome`,
-          role: 'assistant',
-          text: 'Hello! I am your AI Cyber Fraud Safety Assistant. Paste any suspicious message, SMS, email, or WhatsApp communication below to inspect scam indicators in real-time.',
-          timestamp: new Date().toISOString(),
-        },
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
-}
-
-export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithData }) => {
   const [sessions, setSessions] = useState<ChatSession[]>(getInitialSessions);
   const [activeSessionId, setActiveSessionId] = useState<string>(() => sessions[0]?.id || 'session-1');
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hi' | 'ta'>('en');
+  const [reactionMap, setReactionMap] = useState<Record<string, 'like' | 'dislike'>>({});
+
+  // Chat History Search & Filter State
+  const [historySearch, setHistorySearch] = useState('');
+  const [pinnedSessionIds, setPinnedSessionIds] = useState<string[]>([]);
+
+  // Voice Input Hook
+  const { isListening, hasSupport: hasVoiceSupport, toggleListening } = useVoiceInput((transcript) => {
+    setInputMessage((prev) => (prev ? `${prev} ${transcript}` : transcript));
+  });
+
+  // Audio Player Hook
+  const { isPlaying, isPaused, playbackRate, activeText, playText, pauseAudio, resumeAudio, stopAudio, setSpeed } = useAudioPlayer();
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Sync welcome message if language changes on empty/initial session
+  useEffect(() => {
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.messages.length === 1 && s.messages[0].id === 'msg-welcome') {
+          return {
+            ...s,
+            messages: [{ ...s.messages[0], text: t('welcomeMessage') }],
+          };
+        }
+        return s;
+      }),
+    );
+  }, [language]);
 
   // Save sessions to localStorage on change
   useEffect(() => {
@@ -88,12 +131,12 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
     const newId = `session-${Date.now()}`;
     const newSession: ChatSession = {
       id: newId,
-      title: `New Analysis`,
+      title: t('newChat'),
       messages: [
         {
           id: `msg-${Date.now()}`,
           role: 'assistant',
-          text: 'Hello! I am your AI Cyber Fraud Safety Assistant. Paste any suspicious message below.',
+          text: t('welcomeMessage'),
           timestamp: new Date().toISOString(),
         },
       ],
@@ -112,7 +155,7 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
       {
         id: `msg-${Date.now()}`,
         role: 'assistant',
-        text: 'Chat cleared. How can I help you analyze messages?',
+        text: t('welcomeMessage'),
         timestamp: new Date().toISOString(),
       },
     ];
@@ -121,6 +164,28 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
       prev.map((s) => (s.id === activeSession.id ? { ...s, messages: clearedMessages, updatedAt: new Date().toISOString() } : s)),
     );
     showToast({ type: 'info', title: 'Chat Cleared', message: 'Current conversation history reset.' });
+  }
+
+  function handleSpeakText(text: string) {
+    if (!('speechSynthesis' in window)) {
+      showToast({ type: 'warning', title: 'Speech Unavailable', message: 'Text-to-speech is not supported by your browser.' });
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language === 'hi' ? 'hi-IN' : language === 'ta' ? 'ta-IN' : 'en-US';
+    window.speechSynthesis.speak(utterance);
+    showToast({ type: 'info', title: 'Reading Aloud', message: 'Playing audio explanation...' });
+  }
+
+  function handleDownloadJSON(msg: ChatMessage) {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(msg, null, 2));
+    const a = document.createElement('a');
+    a.href = dataStr;
+    a.download = `scam_analysis_${msg.id}.json`;
+    a.click();
+    a.remove();
+    showToast({ type: 'success', title: 'Downloaded', message: 'Analysis exported as JSON.' });
   }
 
   async function handleSendMessage(customText?: string) {
@@ -181,7 +246,7 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
 
       // 2. If non-English selected, perform translation
       let finalResult = resultObj;
-      if (selectedLanguage !== 'en') {
+      if (language !== 'en' && (language === 'hi' || language === 'ta')) {
         const tr = await translateAnalysis(
           {
             verdict: prediction.prediction === 'Scam' ? 'Scam Detected' : 'Legitimate Communication',
@@ -189,7 +254,7 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
             triggered_signals: prediction.triggeredSignals,
             recommended_actions: defaultActions,
           },
-          selectedLanguage,
+          language as 'hi' | 'ta',
         );
 
         finalResult = {
@@ -197,7 +262,7 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
           explanation: tr.explanation,
           triggeredSignals: tr.triggered_signals,
           recommendedActions: tr.recommended_actions,
-          language: selectedLanguage,
+          language: language,
         };
       }
 
@@ -207,8 +272,8 @@ export const CheckerPage: React.FC<CheckerPageProps> = ({ onOpenReportModalWithD
         text: `Analysis complete. Verdict: ${finalResult.prediction} (${finalResult.confidence}% confidence).`,
         timestamp: new Date().toISOString(),
         result: resultObj,
-        translatedResult: selectedLanguage !== 'en' ? finalResult : undefined,
-        currentLanguage: selectedLanguage,
+        translatedResult: language !== 'en' ? finalResult : undefined,
+        currentLanguage: language,
       };
 
       setSessions((prev) =>
@@ -426,25 +491,25 @@ Explanation: ${result?.explanation || 'N/A'}`;
             <Globe className="w-4 h-4 text-slate-400 ml-2" />
             <span className="text-xs font-mono text-slate-400">Lang:</span>
             <button
-              onClick={() => setSelectedLanguage('en')}
+              onClick={() => setLanguage('en')}
               className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all ${
-                selectedLanguage === 'en' ? 'bg-brand-indigo text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                language === 'en' ? 'bg-brand-indigo text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               English
             </button>
             <button
-              onClick={() => setSelectedLanguage('hi')}
+              onClick={() => setLanguage('hi')}
               className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all ${
-                selectedLanguage === 'hi' ? 'bg-brand-indigo text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                language === 'hi' ? 'bg-brand-indigo text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               हिंदी (HI)
             </button>
             <button
-              onClick={() => setSelectedLanguage('ta')}
+              onClick={() => setLanguage('ta')}
               className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all ${
-                selectedLanguage === 'ta' ? 'bg-brand-indigo text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                language === 'ta' ? 'bg-brand-indigo text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               தமிழ் (TA)
@@ -484,8 +549,43 @@ Explanation: ${result?.explanation || 'N/A'}`;
                       <div className="whitespace-pre-wrap">{msg.text}</div>
                     ) : (
                       <div className="space-y-4">
-                        {/* Welcome text or plain text */}
-                        {!displayResult && <div>{msg.text}</div>}
+                        {/* Welcome text or plain text with Sample Example Chips */}
+                        {!displayResult && (
+                          <div className="space-y-4">
+                            <div>{msg.text}</div>
+                            
+                            {/* Sample Clickable Scam Examples */}
+                            <div className="pt-2 space-y-2 border-t border-graphite-700">
+                              <div className="text-[11px] font-mono font-bold text-brand-gold uppercase tracking-wider flex items-center space-x-1">
+                                <SparkleIcon className="w-3.5 h-3.5 inline" />
+                                <span>{t('tryExamples')}</span>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {[
+                                  { label: 'Fake SBI KYC Message', text: t('exSbi') },
+                                  { label: 'Lottery Scam', text: t('exLottery') },
+                                  { label: 'UPI Payment Request', text: t('exUpi') },
+                                  { label: 'Fake Courier Delivery', text: t('exCourier') },
+                                ].map((ex, exIdx) => (
+                                  <button
+                                    key={exIdx}
+                                    onClick={() => {
+                                      setInputMessage(ex.text);
+                                      void handleSendMessage(ex.text);
+                                    }}
+                                    className="p-3 bg-graphite-850 hover:bg-graphite-800 border border-graphite-700 hover:border-brand-purple rounded-xl text-left transition-all space-y-1 group"
+                                  >
+                                    <div className="font-mono text-xs font-bold text-slate-200 group-hover:text-brand-gold flex items-center justify-between">
+                                      <span>{ex.label}</span>
+                                      <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-brand-gold" />
+                                    </div>
+                                    <div className="text-[10px] font-sans text-slate-400 line-clamp-2">{ex.text}</div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Structured AI Verdict Card */}
                         {displayResult && (
@@ -554,6 +654,9 @@ Explanation: ${result?.explanation || 'N/A'}`;
                               </p>
                             </div>
 
+                            {/* Expandable Feature Weight Breakdown */}
+                            <ExplainabilityPanel result={displayResult} />
+
                             {/* Recommended Actions */}
                             {displayResult.recommendedActions && displayResult.recommendedActions.length > 0 && (
                               <div>
@@ -572,24 +675,41 @@ Explanation: ${result?.explanation || 'N/A'}`;
                               </div>
                             )}
 
-                            {/* Citizen Report Callout Prompt */}
+                            {/* Visual Explainability Gauge Dashboard */}
+                            <ExplainabilityDashboard result={displayResult} />
+
+                            {/* Citizen Report Callout Prompt & Formal Incident Summary Generator */}
                             {displayResult.prediction === 'Scam' && (
-                              <div className="bg-gradient-to-r from-brand-indigo/30 to-graphite-850 border border-brand-purple/40 p-3 rounded-xl flex items-center justify-between mt-3">
+                              <div className="bg-gradient-to-r from-brand-indigo/30 to-graphite-850 border border-brand-purple/40 p-3 rounded-xl flex items-center justify-between mt-3 flex-wrap gap-2">
                                 <div className="text-xs text-slate-200">
                                   Would you like to report this incident to the National Cyber Crime Command Center?
                                 </div>
-                                <button
-                                  onClick={() => {
-                                    // Find user's original query text
-                                    const userMsgIdx = activeSession.messages.findIndex((m) => m.id === msg.id);
-                                    const prevUserMsg = activeSession.messages[userMsgIdx - 1]?.text || msg.text;
-                                    handleReportClick(prevUserMsg, displayResult);
-                                  }}
-                                  className="bg-brand-indigo hover:bg-brand-purple text-white px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1 shrink-0 ml-3 shadow-glow-purple transition-all"
-                                >
-                                  <span>Report Incident</span>
-                                  <ArrowRight className="w-3.5 h-3.5" />
-                                </button>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => {
+                                      const userMsgIdx = activeSession.messages.findIndex((m) => m.id === msg.id);
+                                      const prevUserMsg = activeSession.messages[userMsgIdx - 1]?.text || msg.text;
+                                      generateOfficialCyberCrimeReport(prevUserMsg, displayResult);
+                                    }}
+                                    className="bg-graphite-800 hover:bg-graphite-700 text-brand-gold border border-brand-gold/40 px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1 shrink-0 transition-all"
+                                    title="Download formal civilian incident summary"
+                                  >
+                                    <FileCheck className="w-3.5 h-3.5" />
+                                    <span>Formal Cyber Crime Report</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => {
+                                      const userMsgIdx = activeSession.messages.findIndex((m) => m.id === msg.id);
+                                      const prevUserMsg = activeSession.messages[userMsgIdx - 1]?.text || msg.text;
+                                      handleReportClick(prevUserMsg, displayResult);
+                                    }}
+                                    className="bg-brand-indigo hover:bg-brand-purple text-white px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1 shrink-0 shadow-glow-purple transition-all"
+                                  >
+                                    <span>Report Incident</span>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -650,18 +770,47 @@ Explanation: ${result?.explanation || 'N/A'}`;
                         </button>
                       </div>
 
-                      {/* Analyze Again */}
+                      {/* Listen / TTS Button */}
                       <button
-                        onClick={() => {
-                          const userMsgIdx = activeSession.messages.findIndex((m) => m.id === msg.id);
-                          const prevUserMsg = activeSession.messages[userMsgIdx - 1]?.text || msg.text;
-                          void handleSendMessage(prevUserMsg);
-                        }}
-                        className="px-2.5 py-1 bg-graphite-900 border border-graphite-700 hover:bg-graphite-800 text-slate-400 rounded-lg flex items-center space-x-1 transition-colors"
+                        onClick={() => handleSpeakText(displayResult?.explanation || msg.text)}
+                        className="px-2.5 py-1 bg-graphite-900 border border-graphite-700 hover:bg-graphite-800 text-brand-gold rounded-lg flex items-center space-x-1 transition-colors"
+                        title="Read Explanation Aloud (Text-to-Speech)"
                       >
-                        <RefreshCw className="w-3 h-3" />
-                        <span>Re-analyze</span>
+                        <Volume2 className="w-3 h-3 text-brand-gold" />
+                        <span>{t('listen')}</span>
                       </button>
+
+                      {/* Download Report JSON */}
+                      <button
+                        onClick={() => handleDownloadJSON(msg)}
+                        className="px-2.5 py-1 bg-graphite-900 border border-graphite-700 hover:bg-graphite-800 text-slate-300 rounded-lg flex items-center space-x-1 transition-colors"
+                        title="Download Analysis Report"
+                      >
+                        <Download className="w-3 h-3 text-slate-400" />
+                        <span>{t('download')}</span>
+                      </button>
+
+                      {/* Reactions */}
+                      <div className="flex items-center space-x-1 bg-graphite-900 border border-graphite-700 rounded-lg px-2 py-0.5">
+                        <button
+                          onClick={() => {
+                            setReactionMap((prev) => ({ ...prev, [msg.id]: 'like' }));
+                            showToast({ type: 'success', title: 'Feedback Recorded', message: 'Thanks for your feedback!' });
+                          }}
+                          className={`p-1 rounded ${reactionMap[msg.id] === 'like' ? 'text-signal-green font-bold' : 'text-slate-400 hover:text-white'}`}
+                        >
+                          <ThumbsUp className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setReactionMap((prev) => ({ ...prev, [msg.id]: 'dislike' }));
+                            showToast({ type: 'info', title: 'Feedback Recorded', message: 'We will improve our model analysis.' });
+                          }}
+                          className={`p-1 rounded ${reactionMap[msg.id] === 'dislike' ? 'text-signal-red font-bold' : 'text-slate-400 hover:text-white'}`}
+                        >
+                          <ThumbsDown className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -697,13 +846,26 @@ Explanation: ${result?.explanation || 'N/A'}`;
         {/* Bottom Input Area */}
         <div className="p-4 border-t border-graphite-700 bg-graphite-900 shrink-0">
           <div className="max-w-4xl mx-auto space-y-2">
+            {/* Listening Indicator Banner */}
+            {isListening && (
+              <div className="p-2 bg-signal-red/20 border border-signal-red/40 rounded-xl flex items-center justify-between text-xs font-mono text-signal-red animate-pulse">
+                <span className="flex items-center space-x-2">
+                  <Mic className="w-4 h-4 animate-bounce text-signal-red" />
+                  <span>Listening... Speak clearly to transcribe suspicious message text.</span>
+                </span>
+                <button onClick={toggleListening} className="text-xs font-bold underline">
+                  Stop Recording
+                </button>
+              </div>
+            )}
+
             <div className="relative bg-graphite-950 border border-graphite-700 rounded-2xl p-2 focus-within:border-brand-purple shadow-2xl transition-all">
               <textarea
                 rows={2}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Paste suspicious SMS, WhatsApp message, email, or UPI payment link... (Press Enter to send, Shift+Enter for newline)"
+                placeholder={t('typePlaceholder')}
                 className="w-full bg-transparent p-2 text-xs text-slate-200 placeholder-slate-500 font-mono focus:outline-none resize-none"
               />
 
@@ -712,14 +874,30 @@ Explanation: ${result?.explanation || 'N/A'}`;
                   Enter to send | Shift + Enter for line break
                 </div>
 
-                <button
-                  onClick={() => void handleSendMessage()}
-                  disabled={loading || !inputMessage.trim()}
-                  className="bg-gradient-to-r from-brand-indigo to-brand-purple hover:from-brand-purple hover:to-brand-indigo text-white font-mono text-xs font-bold py-1.5 px-4 rounded-xl shadow-glow-purple flex items-center space-x-1.5 transition-all disabled:opacity-40"
-                >
-                  <span>Send</span>
-                  <Send className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center space-x-2">
+                  {/* Voice Input Microphone Button */}
+                  <button
+                    type="button"
+                    onClick={toggleListening}
+                    className={`p-2 rounded-xl border transition-all ${
+                      isListening
+                        ? 'bg-signal-red text-white border-signal-red animate-pulse shadow-glow-red'
+                        : 'bg-graphite-850 hover:bg-graphite-800 text-slate-400 hover:text-brand-gold border-graphite-700'
+                    }`}
+                    title="Voice Input (Speech-to-Text)"
+                  >
+                    {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                  </button>
+
+                  <button
+                    onClick={() => void handleSendMessage()}
+                    disabled={loading || !inputMessage.trim()}
+                    className="bg-gradient-to-r from-brand-indigo to-brand-purple hover:from-brand-purple hover:to-brand-indigo text-white font-mono text-xs font-bold py-1.5 px-4 rounded-xl shadow-glow-purple flex items-center space-x-1.5 transition-all disabled:opacity-40"
+                  >
+                    <span>{t('send')}</span>
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

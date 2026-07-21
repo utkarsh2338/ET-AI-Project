@@ -91,7 +91,7 @@ export interface ChatMessageResult {
   explanation: string;
   triggeredSignals: string[];
   recommendedActions?: string[];
-  language?: 'en' | 'hi' | 'ta';
+  language?: string;
 }
 
 export interface ChatMessage {
@@ -101,7 +101,7 @@ export interface ChatMessage {
   timestamp: string;
   result?: ChatMessageResult;
   translatedResult?: ChatMessageResult;
-  currentLanguage?: 'en' | 'hi' | 'ta';
+  currentLanguage?: string;
   isTranslating?: boolean;
 }
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Shield, Radio, Map, FileText, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Shield, Radio, Map, FileText, CheckCircle2, RefreshCw, Play, Network, HelpCircle, Settings } from 'lucide-react';
+import { useI18n } from '../../context/I18nContext';
 
 interface NavbarProps {
   activeTab: 'map' | 'reports' | 'checker' | 'analytics';
@@ -7,6 +8,11 @@ interface NavbarProps {
   isConnected: boolean;
   liveConnections: number;
   onRefresh?: () => void;
+  onRunDemo?: () => void;
+  onOpenArchitecture?: () => void;
+  onStartTour?: () => void;
+  onOpenSettings?: () => void;
+  onNavigateHome?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -15,25 +21,41 @@ export const Navbar: React.FC<NavbarProps> = ({
   isConnected,
   liveConnections,
   onRefresh,
+  onRunDemo,
+  onOpenArchitecture,
+  onStartTour,
+  onOpenSettings,
+  onNavigateHome,
 }) => {
+  const { t } = useI18n();
+
+  function handleLogoClick() {
+    if (onNavigateHome) onNavigateHome();
+    else setActiveTab('map');
+  }
+
   return (
     <header className="h-16 bg-graphite-900 border-b border-graphite-700 px-6 flex items-center justify-between shrink-0 select-none z-30">
-      {/* Brand & Identity */}
-      <div className="flex items-center space-x-4">
-        <div className="w-10 h-10 rounded-xl bg-brand-indigo/30 border border-brand-purple/40 flex items-center justify-center text-brand-gold shadow-glow-purple">
+      {/* Brand & Identity — Click Logo to Navigate Home */}
+      <div
+        onClick={handleLogoClick}
+        className="flex items-center space-x-4 cursor-pointer group transition-transform hover:scale-[1.01]"
+        title="Navigate to Home Dashboard"
+      >
+        <div className="w-10 h-10 rounded-xl bg-brand-indigo/30 border border-brand-purple/40 flex items-center justify-center text-brand-gold shadow-glow-purple group-hover:border-brand-gold">
           <Shield className="w-6 h-6" />
         </div>
         <div>
           <div className="flex items-center space-x-2">
-            <h1 className="font-serif font-bold text-xl text-slate-100 tracking-wide">
-              Citizen Fraud Shield
+            <h1 className="font-serif font-bold text-xl text-slate-100 tracking-wide group-hover:text-brand-gold transition-colors">
+              {t('appName')}
             </h1>
             <span className="px-2 py-0.5 text-[10px] font-mono font-semibold bg-brand-purple/20 text-brand-gold border border-brand-purple/40 rounded-md uppercase tracking-wider">
-              Command Center
+              {t('commandCenter')}
             </span>
           </div>
           <p className="text-xs text-slate-400 font-mono">
-            National Cyber Fraud Detection & Response Grid
+            {t('tagline')}
           </p>
         </div>
       </div>
@@ -49,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           }`}
         >
           <Map className="w-4 h-4" />
-          <span>Geospatial Map</span>
+          <span>{t('navMap')}</span>
         </button>
 
         <button
@@ -61,7 +83,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Live Reports</span>
+          <span>{t('navReports')}</span>
         </button>
 
         <button
@@ -73,12 +95,58 @@ export const Navbar: React.FC<NavbarProps> = ({
           }`}
         >
           <CheckCircle2 className="w-4 h-4" />
-          <span>AI Scam Checker</span>
+          <span>{t('navChecker')}</span>
         </button>
       </nav>
 
       {/* Real-time Connection Badge & Controls */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-3">
+        {/* Run Demo Button */}
+        {onRunDemo && (
+          <button
+            onClick={onRunDemo}
+            className="bg-gradient-to-r from-brand-indigo to-brand-purple hover:from-brand-purple hover:to-brand-indigo text-white font-mono text-xs font-bold py-1.5 px-3.5 rounded-xl shadow-glow-purple flex items-center space-x-1.5 transition-all border border-brand-purple/50"
+            title="Run Hackathon Automated Demo"
+          >
+            <Play className="w-3.5 h-3.5 fill-white" />
+            <span>{t('runDemo')}</span>
+          </button>
+        )}
+
+        {/* System Architecture Button */}
+        {onOpenArchitecture && (
+          <button
+            onClick={onOpenArchitecture}
+            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-graphite-800 rounded-lg transition-colors border border-graphite-700 flex items-center space-x-1 font-mono text-xs"
+            title="System Architecture"
+          >
+            <Network className="w-4 h-4 text-brand-gold" />
+            <span className="hidden md:inline">{t('architecture')}</span>
+          </button>
+        )}
+
+        {/* Settings Button */}
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-graphite-800 rounded-lg transition-colors border border-graphite-700"
+            title="System Preferences"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* Guided Tour Trigger */}
+        {onStartTour && (
+          <button
+            onClick={onStartTour}
+            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-graphite-800 rounded-lg transition-colors border border-graphite-700"
+            title="Start Guided Tour"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+        )}
+
         {onRefresh && (
           <button
             onClick={onRefresh}
@@ -89,6 +157,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         )}
 
+        {/* Connection Indicator Status (🟢 Connected / 🟡 Reconnecting... / 🔴 Offline) */}
         <div className="flex items-center space-x-2 bg-graphite-950 border border-graphite-700 px-3 py-1.5 rounded-lg text-xs font-mono">
           <div className="relative flex items-center justify-center w-2.5 h-2.5">
             <span
@@ -103,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             />
           </div>
           <span className={isConnected ? 'text-signal-green font-medium' : 'text-signal-red'}>
-            {isConnected ? 'LIVE FEED' : 'OFFLINE'}
+            {isConnected ? `🟢 ${t('liveFeed')}` : `🔴 ${t('offline')}`}
           </span>
           <span className="text-slate-500">|</span>
           <span className="text-slate-400 flex items-center space-x-1">
@@ -115,3 +184,5 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+
+
