@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { X, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import { submitReport } from '../../lib/api';
 
+import { PrefillReportData } from '../../types';
+
 interface ReportFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  prefillData?: PrefillReportData | null;
 }
 
 const DISTRICT_COORDS: Record<string, { state: string; lat: number; lng: number }> = {
@@ -21,7 +24,7 @@ const DISTRICT_COORDS: Record<string, { state: string; lat: number; lng: number 
   'Noida':       { state: 'Uttar Pradesh',  lat: 28.5355, lng: 77.3910 },
 };
 
-export const ReportForm: React.FC<ReportFormProps> = ({ isOpen, onClose, onSuccess }) => {
+export const ReportForm: React.FC<ReportFormProps> = ({ isOpen, onClose, onSuccess, prefillData }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('UPI Fraud');
@@ -34,6 +37,25 @@ export const ReportForm: React.FC<ReportFormProps> = ({ isOpen, onClose, onSucce
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
+
+  // Sync prefillData whenever modal opens with prefilled content
+  React.useEffect(() => {
+    if (prefillData) {
+      if (prefillData.title) setTitle(prefillData.title);
+      if (prefillData.description) setDescription(prefillData.description);
+      if (prefillData.category) setCategory(prefillData.category);
+      if (prefillData.severity) setSeverity(prefillData.severity);
+      if (prefillData.district) {
+        setDistrict(prefillData.district);
+        const info = DISTRICT_COORDS[prefillData.district];
+        if (info) {
+          setState(info.state);
+          setLat(info.lat);
+          setLng(info.lng);
+        }
+      }
+    }
+  }, [prefillData, isOpen]);
 
   if (!isOpen) return null;
 

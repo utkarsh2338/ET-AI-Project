@@ -83,3 +83,44 @@ export interface FilterState {
   category: string;
   search: string;
 }
+
+export interface ChatMessageResult {
+  prediction: string;
+  confidence: number;
+  risk: string;
+  explanation: string;
+  triggeredSignals: string[];
+  recommendedActions?: string[];
+  language?: 'en' | 'hi' | 'ta';
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  timestamp: string;
+  result?: ChatMessageResult;
+  translatedResult?: ChatMessageResult;
+  currentLanguage?: 'en' | 'hi' | 'ta';
+  isTranslating?: boolean;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PrefillReportData {
+  title?: string;
+  description?: string;
+  category?: string;
+  district?: string;
+  state?: string;
+  severity?: Severity;
+  scamPrediction?: string;
+  confidence?: number;
+}
+

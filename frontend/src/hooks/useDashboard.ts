@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { fetchDashboard } from '../lib/api';
 import { useSocket, NewReportEvent, HotspotUpdateEvent } from './useSocket';
 import { DashboardSummary, MapMarker, AnalyticsData } from '../types';
+import { showToast } from './useToast';
 
 export function useDashboard() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -26,6 +27,15 @@ export function useDashboard() {
   }, []);
 
   const handleNewReport = useCallback((event: NewReportEvent) => {
+    // Show Toast Notification for incoming report
+    showToast({
+      type: event.report.severity === 'Critical' ? 'error' : 'warning',
+      title: `New Incident Reported — ${event.report.district}`,
+      message: `${event.report.title} (${event.report.severity} Severity)`,
+      district: event.report.district,
+      reportId: event.report.reportId,
+    });
+
     // Optimistically update summary metrics
     setSummary((prev) => {
       if (!prev) return prev;

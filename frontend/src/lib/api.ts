@@ -88,3 +88,31 @@ export async function analyzeScamText(message: string): Promise<{
   }
   return json.data;
 }
+
+export async function translateAnalysis(
+  data: {
+    verdict: string;
+    explanation: string;
+    triggered_signals: string[];
+    recommended_actions: string[];
+  },
+  targetLanguage: 'hi' | 'ta' | 'en',
+): Promise<{
+  verdict: string;
+  explanation: string;
+  triggered_signals: string[];
+  recommended_actions: string[];
+  language: string;
+}> {
+  const res = await fetch(`${API_BASE}/translate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data, targetLanguage }),
+  });
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json.error?.message || 'Translation failed');
+  }
+  return json.data;
+}
+

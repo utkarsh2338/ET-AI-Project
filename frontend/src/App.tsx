@@ -6,14 +6,22 @@ import { CommandCenter } from './pages/CommandCenter';
 import { ReportsPage } from './pages/ReportsPage';
 import { CheckerPage } from './pages/CheckerPage';
 import { ReportForm } from './components/reports/ReportForm';
+import { ToastContainer } from './components/common/ToastContainer';
 import { useDashboard } from './hooks/useDashboard';
+import { PrefillReportData } from './types';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'map' | 'reports' | 'checker' | 'analytics'>('map');
   const [currentView, setCurrentView] = useState<'overview' | 'hotspots' | 'analytics'>('overview');
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [prefillReportData, setPrefillReportData] = useState<PrefillReportData | null>(null);
 
   const { summary, refresh, isConnected, liveConnections } = useDashboard();
+
+  function handleOpenReportModalWithData(data: PrefillReportData) {
+    setPrefillReportData(data);
+    setIsReportModalOpen(true);
+  }
 
   return (
     <div className="h-screen w-screen flex flex-col bg-graphite-950 text-slate-100 overflow-hidden font-sans">
@@ -40,7 +48,10 @@ export const App: React.FC = () => {
             if (view === 'analytics') setActiveTab('analytics');
             else setActiveTab('map');
           }}
-          onOpenReportModal={() => setIsReportModalOpen(true)}
+          onOpenReportModal={() => {
+            setPrefillReportData(null);
+            setIsReportModalOpen(true);
+          }}
         />
 
         {/* Dynamic Main Workspace Area */}
@@ -48,7 +59,9 @@ export const App: React.FC = () => {
           {activeTab === 'map' && <CommandCenter currentView={currentView} />}
           {activeTab === 'analytics' && <CommandCenter currentView="analytics" />}
           {activeTab === 'reports' && <ReportsPage />}
-          {activeTab === 'checker' && <CheckerPage />}
+          {activeTab === 'checker' && (
+            <CheckerPage onOpenReportModalWithData={handleOpenReportModalWithData} />
+          )}
         </main>
       </div>
 
@@ -58,10 +71,17 @@ export const App: React.FC = () => {
         totalReports={summary?.totalReports ?? 262}
       />
 
+      {/* Real-time Socket.IO & System Toast Container */}
+      <ToastContainer />
+
       {/* Citizen Report Form Modal */}
       <ReportForm
         isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
+        onClose={() => {
+          setIsReportModalOpen(false);
+          setPrefillReportData(null);
+        }}
+        prefillData={prefillReportData}
         onSuccess={() => {
           refresh();
         }}

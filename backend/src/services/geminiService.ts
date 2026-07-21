@@ -177,3 +177,65 @@ export async function analyzeWithGemini(
     throw new GeminiUnavailableError(message_);
   }
 }
+
+export interface TranslationResult {
+  verdict: string;
+  explanation: string;
+  triggered_signals: string[];
+  recommended_actions: string[];
+  language: string;
+}
+
+export async function translateAnalysisResult(
+  data: {
+    verdict: string;
+    explanation: string;
+    triggered_signals: string[];
+    recommended_actions: string[];
+  },
+  targetLanguage: 'hi' | 'ta' | 'en',
+): Promise<TranslationResult> {
+  if (targetLanguage === 'en') {
+    return {
+      ...data,
+      language: 'en',
+    };
+  }
+
+  const langName = targetLanguage === 'hi' ? 'Hindi' : 'Tamil';
+  const prompt = `Translate the following cyber fraud analysis report into natural, accurate ${langName}. Preserve technical clarity and legal advice accurately.
+
+Input JSON:
+${JSON.stringify(data, null, 2)}
+
+Respond with valid JSON only in this exact format:
+{
+  "verdict": "<Translated verdict e.g. Scam Detected / Legitimate Communication in ${langName}>",
+  "explanation": "<Translated explanation text>",
+  "triggered_signals": ["<translated signal 1>", "<translated signal 2>", ...],
+  "recommended_actions": ["<translated action 1>", "<translated action 2>", ...]
+}`;
+
+  try {
+    const model = getModel();
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const cleaned = text.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim();
+    const parsed = JSON.parse(cleaned);
+
+    return {
+      verdict: parsed.verdict || data.verdict,
+      explanation: parsed.explanation || data.explanation,
+      triggered_signals: Array.isArray(parsed.triggered_signals) ? parsed.triggered_signals : data.triggered_signals,
+      recommended_actions: Array.isArray(parsed.recommended_actions) ? parsed.recommended_actions : data.recommended_actions,
+      language: targetLanguage,
+    };
+  } catch (err) {
+    logger.warn('Gemini translation failed — returning original English text', { error: String(err) });
+    return {
+      ...data,
+      language: 'en',
+    };
+  }
+}
+

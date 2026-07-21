@@ -68,6 +68,36 @@ export function handleExtractFeatures(
 }
 
 
+export async function handleTranslate(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  const startTime = Date.now();
+  try {
+    const { data, targetLanguage } = req.body as {
+      data: {
+        verdict: string;
+        explanation: string;
+        triggered_signals: string[];
+        recommended_actions: string[];
+      };
+      targetLanguage: 'hi' | 'ta' | 'en';
+    };
+
+    if (!data || !targetLanguage) {
+      throw new ValidationError('Fields "data" and "targetLanguage" are required.');
+    }
+
+    const { translateAnalysisResult } = await import('../services/geminiService');
+    const translated = await translateAnalysisResult(data, targetLanguage);
+    sendSuccess(res, translated, 200, startTime);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export function handleMethodNotAllowed(_req: Request, res: Response): void {
   sendError(res, 405, 'METHOD_NOT_ALLOWED', 'This endpoint only accepts POST requests.');
 }
+
