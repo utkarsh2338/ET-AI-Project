@@ -1,0 +1,362 @@
+[
+  {
+    "title": "Asked to pay to release lottery winnings",
+    "description": "A message said I won a prize in a lucky draw I don't remember entering, and I was asked to pay a fee to release it.",
+    "district": "Ranchi",
+    "state": "Jharkhand",
+    "severity": "critical",
+    "timestamp": "2023-06-16T01:46:43Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Kanpur Nagar",
+    "state": "Uttar Pradesh",
+    "severity": "low",
+    "timestamp": "2025-05-12T11:30:42Z"
+  },
+  {
+    "title": "Asked to pay to release lottery winnings",
+    "description": "A message said I won a prize in a lucky draw I don't remember entering, and I was asked to pay a fee to release it.",
+    "district": "Rangareddy",
+    "state": "Telangana",
+    "severity": "medium",
+    "timestamp": "2023-02-27T06:14:43Z"
+  },
+  {
+    "title": "Job offer asked for registration fee",
+    "description": "Applied for a work-from-home data entry job, was asked to pay a refundable security deposit first, and stopped receiving replies after paying.",
+    "district": "Coimbatore",
+    "state": "Tamil Nadu",
+    "severity": "low",
+    "timestamp": "2025-01-31T17:37:26Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Lucknow",
+    "state": "Uttar Pradesh",
+    "severity": "medium",
+    "timestamp": "2025-03-22T08:07:14Z"
+  },
+  {
+    "title": "Asked to pay to release lottery winnings",
+    "description": "A message said I won a prize in a lucky draw I don't remember entering, and I was asked to pay a fee to release it.",
+    "district": "Guwahati",
+    "state": "Assam",
+    "severity": "low",
+    "timestamp": "2023-08-18T07:55:53Z"
+  },
+  {
+    "title": "Threatened after video call screenshot",
+    "description": "Someone I matched with online video-called me, later sent a screenshot and demanded money or threatened to share it with my contacts.",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "severity": "low",
+    "timestamp": "2024-05-30T22:31:14Z"
+  },
+  {
+    "title": "SIM stopped working, account accessed",
+    "description": "My SIM suddenly stopped getting signal, and later I found unauthorized transactions on my bank account linked to that number.",
+    "district": "New Delhi",
+    "state": "Delhi",
+    "severity": "medium",
+    "timestamp": "2023-08-20T23:32:58Z"
+  },
+  {
+    "title": "Order never delivered, seller unreachable",
+    "description": "Paid for a product on a site advertised through social media ads, it was never delivered, and the seller's number is now unreachable.",
+    "district": "Noida (Gautam Buddh Nagar)",
+    "state": "Uttar Pradesh",
+    "severity": "high",
+    "timestamp": "2023-05-31T14:08:55Z"
+  },
+  {
+    "title": "SIM stopped working, account accessed",
+    "description": "My SIM suddenly stopped getting signal, and later I found unauthorized transactions on my bank account linked to that number.",
+    "district": "Noida (Gautam Buddh Nagar)",
+    "state": "Uttar Pradesh",
+    "severity": "high",
+    "timestamp": "2023-08-23T20:46:32Z"
+  },
+  {
+    "title": "Money debited after clicking KYC link",
+    "description": "Got an SMS saying my bank KYC will expire today, clicked the link and entered my details, and later found money missing from my account.",
+    "district": "New Delhi",
+    "state": "Delhi",
+    "severity": "medium",
+    "timestamp": "2023-12-17T06:36:30Z"
+  },
+  {
+    "title": "Money debited after clicking KYC link",
+    "description": "Got an SMS saying my bank KYC will expire today, clicked the link and entered my details, and later found money missing from my account.",
+    "district": "Mysuru",
+    "state": "Karnataka",
+    "severity": "high",
+    "timestamp": "2023-04-28T12:15:03Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "severity": "high",
+    "timestamp": "2024-03-12T14:19:07Z"
+  },
+  {
+    "title": "Asked to pay to release lottery winnings",
+    "description": "A message said I won a prize in a lucky draw I don't remember entering, and I was asked to pay a fee to release it.",
+    "district": "Nagpur",
+    "state": "Maharashtra",
+    "severity": "high",
+    "timestamp": "2024-02-17T18:07:58Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Dakshina Kannada (Mangaluru)",
+    "state": "Karnataka",
+    "severity": "high",
+    "timestamp": "2024-11-30T23:43:00Z"
+  },
+  {
+    "title": "Threatened after video call screenshot",
+    "description": "Someone I matched with online video-called me, later sent a screenshot and demanded money or threatened to share it with my contacts.",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "severity": "medium",
+    "timestamp": "2025-12-10T11:46:31Z"
+  },
+  {
+    "title": "Received a call claiming courier held at customs",
+    "description": "Caller said a parcel booked under my name was stopped at customs with illegal items and asked me to stay on a video call while 'verification' was done.",
+    "district": "Vadodara",
+    "state": "Gujarat",
+    "severity": "medium",
+    "timestamp": "2024-12-29T17:20:51Z"
+  },
+  {
+    "title": "Order never delivered, seller unreachable",
+    "description": "Paid for a product on a site advertised through social media ads, it was never delivered, and the seller's number is now unreachable.",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "severity": "critical",
+    "timestamp": "2024-05-11T08:22:12Z"
+  },
+  {
+    "title": "Job offer asked for registration fee",
+    "description": "Applied for a work-from-home data entry job, was asked to pay a refundable security deposit first, and stopped receiving replies after paying.",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "severity": "critical",
+    "timestamp": "2025-06-19T03:50:01Z"
+  },
+  {
+    "title": "Job offer asked for registration fee",
+    "description": "Applied for a work-from-home data entry job, was asked to pay a refundable security deposit first, and stopped receiving replies after paying.",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "severity": "high",
+    "timestamp": "2024-01-15T04:35:59Z"
+  },
+  {
+    "title": "Threatened after video call screenshot",
+    "description": "Someone I matched with online video-called me, later sent a screenshot and demanded money or threatened to share it with my contacts.",
+    "district": "Chandigarh",
+    "state": "Chandigarh",
+    "severity": "medium",
+    "timestamp": "2023-10-23T18:56:16Z"
+  },
+  {
+    "title": "SIM stopped working, account accessed",
+    "description": "My SIM suddenly stopped getting signal, and later I found unauthorized transactions on my bank account linked to that number.",
+    "district": "Dehradun",
+    "state": "Uttarakhand",
+    "severity": "high",
+    "timestamp": "2024-07-04T14:00:01Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Dehradun",
+    "state": "Uttarakhand",
+    "severity": "medium",
+    "timestamp": "2025-09-18T01:51:53Z"
+  },
+  {
+    "title": "Received a call claiming courier held at customs",
+    "description": "Caller said a parcel booked under my name was stopped at customs with illegal items and asked me to stay on a video call while 'verification' was done.",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "severity": "medium",
+    "timestamp": "2025-03-14T15:10:44Z"
+  },
+  {
+    "title": "Job offer asked for registration fee",
+    "description": "Applied for a work-from-home data entry job, was asked to pay a refundable security deposit first, and stopped receiving replies after paying.",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "severity": "high",
+    "timestamp": "2025-11-24T02:23:21Z"
+  },
+  {
+    "title": "SIM stopped working, account accessed",
+    "description": "My SIM suddenly stopped getting signal, and later I found unauthorized transactions on my bank account linked to that number.",
+    "district": "Hyderabad",
+    "state": "Telangana",
+    "severity": "high",
+    "timestamp": "2023-03-31T06:10:52Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Kolkata",
+    "state": "West Bengal",
+    "severity": "medium",
+    "timestamp": "2025-08-17T12:59:22Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "severity": "medium",
+    "timestamp": "2024-11-14T07:01:15Z"
+  },
+  {
+    "title": "Job offer asked for registration fee",
+    "description": "Applied for a work-from-home data entry job, was asked to pay a refundable security deposit first, and stopped receiving replies after paying.",
+    "district": "Gurugram",
+    "state": "Haryana",
+    "severity": "medium",
+    "timestamp": "2023-10-26T23:42:09Z"
+  },
+  {
+    "title": "Threatened after video call screenshot",
+    "description": "Someone I matched with online video-called me, later sent a screenshot and demanded money or threatened to share it with my contacts.",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "severity": "low",
+    "timestamp": "2024-06-20T11:36:36Z"
+  },
+  {
+    "title": "SIM stopped working, account accessed",
+    "description": "My SIM suddenly stopped getting signal, and later I found unauthorized transactions on my bank account linked to that number.",
+    "district": "Ghaziabad",
+    "state": "Uttar Pradesh",
+    "severity": "low",
+    "timestamp": "2023-03-11T17:57:49Z"
+  },
+  {
+    "title": "Money debited after clicking KYC link",
+    "description": "Got an SMS saying my bank KYC will expire today, clicked the link and entered my details, and later found money missing from my account.",
+    "district": "Chandigarh",
+    "state": "Chandigarh",
+    "severity": "high",
+    "timestamp": "2023-07-22T11:50:18Z"
+  },
+  {
+    "title": "Investment group promised guaranteed daily returns",
+    "description": "Joined a trading group on a messaging app that promised fixed daily profit, transferred money to their app, and now cannot withdraw anything.",
+    "district": "Chandigarh",
+    "state": "Chandigarh",
+    "severity": "critical",
+    "timestamp": "2023-05-28T09:48:21Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "New Delhi",
+    "state": "Delhi",
+    "severity": "medium",
+    "timestamp": "2024-12-18T17:45:25Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "severity": "medium",
+    "timestamp": "2024-10-23T15:32:23Z"
+  },
+  {
+    "title": "Investment group promised guaranteed daily returns",
+    "description": "Joined a trading group on a messaging app that promised fixed daily profit, transferred money to their app, and now cannot withdraw anything.",
+    "district": "Surat",
+    "state": "Gujarat",
+    "severity": "critical",
+    "timestamp": "2023-11-05T04:13:00Z"
+  },
+  {
+    "title": "Job offer asked for registration fee",
+    "description": "Applied for a work-from-home data entry job, was asked to pay a refundable security deposit first, and stopped receiving replies after paying.",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "severity": "medium",
+    "timestamp": "2024-09-11T05:37:04Z"
+  },
+  {
+    "title": "Asked to pay to release lottery winnings",
+    "description": "A message said I won a prize in a lucky draw I don't remember entering, and I was asked to pay a fee to release it.",
+    "district": "Rangareddy",
+    "state": "Telangana",
+    "severity": "medium",
+    "timestamp": "2024-11-28T02:58:12Z"
+  },
+  {
+    "title": "Order never delivered, seller unreachable",
+    "description": "Paid for a product on a site advertised through social media ads, it was never delivered, and the seller's number is now unreachable.",
+    "district": "Ernakulam (Kochi)",
+    "state": "Kerala",
+    "severity": "medium",
+    "timestamp": "2024-09-15T18:22:29Z"
+  },
+  {
+    "title": "Unauthorized UPI transaction after fake payment link",
+    "description": "Received a link from an unknown number for a 'refund', entered my UPI PIN to 'receive' money, and it was actually debited.",
+    "district": "Guwahati",
+    "state": "Assam",
+    "severity": "medium",
+    "timestamp": "2023-05-19T15:20:57Z"
+  },
+  {
+    "title": "Asked to pay to release lottery winnings",
+    "description": "A message said I won a prize in a lucky draw I don't remember entering, and I was asked to pay a fee to release it.",
+    "district": "Warangal",
+    "state": "Telangana",
+    "severity": "low",
+    "timestamp": "2023-02-17T05:40:17Z"
+  },
+  {
+    "title": "Investment group promised guaranteed daily returns",
+    "description": "Joined a trading group on a messaging app that promised fixed daily profit, transferred money to their app, and now cannot withdraw anything.",
+    "district": "Kolkata",
+    "state": "West Bengal",
+    "severity": "low",
+    "timestamp": "2025-03-29T14:12:57Z"
+  },
+  {
+    "title": "Order never delivered, seller unreachable",
+    "description": "Paid for a product on a site advertised through social media ads, it was never delivered, and the seller's number is now unreachable.",
+    "district": "Warangal",
+    "state": "Telangana",
+    "severity": "medium",
+    "timestamp": "2023-07-23T06:15:46Z"
+  },
+  {
+    "title": "Received a call claiming courier held at customs",
+    "description": "Caller said a parcel booked under my name was stopped at customs with illegal items and asked me to stay on a video call while 'verification' was done.",
+    "district": "Bhubaneswar",
+    "state": "Odisha",
+    "severity": "medium",
+    "timestamp": "2023-06-12T02:51:52Z"
+  },
+  {
+    "title": "Order never delivered, seller unreachable",
+    "description": "Paid for a product on a site advertised through social media ads, it was never delivered, and the seller's number is now unreachable.",
+    "district": "Mumbai",
+    "state": "Maharashtra",
+    "severity": "low",
+    "timestamp": "2024-01-21T08:34:41Z"
+  }
+]

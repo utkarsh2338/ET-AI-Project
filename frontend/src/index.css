@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-graphite-950 text-slate-100 font-sans;
+  }
+}
+
+/* Custom Pulse Ring Animation for Active Command Center Hotspots */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+/* Custom Scrollbar for Command Center Panels */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #14181F;
+}
+::-webkit-scrollbar-thumb {
+  background: #2E3848;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #425066;
+}
+
+/* Leaflet Dark Theme Overrides */
+.leaflet-container {
+  background: #0B0D11 !important;
+  font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid #2E3848 !important;
+  box-shadow: none !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: #1A202A !important;
+  color: #E2E8F0 !important;
+  border-bottom: 1px solid #2E3848 !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #222A36 !important;
+  color: #FFFFFF !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #1A202A !important;
+  color: #E2E8F0 !important;
+  border: 1px solid #2E3848 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-tip {
+  background: #1A202A !important;
+  border: 1px solid #2E3848 !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.5 !important;
+}
+
+/* Pulsing Leaflet Marker Icon */
+.custom-leaflet-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

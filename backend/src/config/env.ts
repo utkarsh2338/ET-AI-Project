@@ -30,5 +30,9 @@ export const config = {
   geminiTimeoutMs: parseInt(getEnvVar('GEMINI_TIMEOUT_MS', false, '15000'), 10),
   rateLimitWindowMs: parseInt(getEnvVar('RATE_LIMIT_WINDOW_MS', false, '60000'), 10),
   rateLimitMax: parseInt(getEnvVar('RATE_LIMIT_MAX', false, '60'), 10),
+  mongodbUri: getEnvVar('MONGODB_URI', true),
+  socketCorsOrigin: getEnvVar('SOCKET_CORS_ORIGIN', false, 'http://localhost:5173'),
+  dedupWindowSeconds: parseInt(getEnvVar('DEDUP_WINDOW_SECONDS', false, '300'), 10),
   isDevelopment: process.env['NODE_ENV'] !== 'production',
 } as const;
+

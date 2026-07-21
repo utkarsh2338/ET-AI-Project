@@ -1,0 +1,19 @@
+category_id,category_name,description
+1,Digital Arrest / Impersonation of Law Enforcement,Fraudster poses as police, CBI, customs, or judiciary official on a video/voice call and coerces the victim into transferring money under threat of arrest.
+2,Online Financial Fraud (UPI/Card/Net-banking),Unauthorized or coerced transactions via UPI, debit/credit card, or net-banking, including fraudulent payment links and QR codes.
+3,Investment / Trading Scam,Fake stock trading, forex, or investment platforms promising unrealistic returns, often run through social media or messaging app groups.
+4,Job Fraud / Work-From-Home Scam,Fake job offers or task-based earning schemes that require upfront payment or harvest banking credentials.
+5,Loan App Harassment,Unregulated instant-loan apps that harvest contacts/photos and use them for blackmail or harassment over small loan defaults.
+6,KYC Update Fraud,Fraudulent calls/SMS/links claiming a bank account, SIM, or e-wallet KYC has expired and must be urgently updated, used to steal credentials.
+7,SIM Swap Fraud,Fraudulent porting or duplication of a victim's SIM card to intercept OTPs and take over bank/payment accounts.
+8,Courier / Parcel Scam,Fraudster claims a parcel in the victim's name contains contraband or illegal items, often used as an opening move into a digital-arrest scam.
+9,Romance / Matrimonial Scam,Fraudster builds a fake romantic or matrimonial relationship online, then requests money for emergencies, travel, or customs fees.
+10,Sextortion,Fraudster obtains or fabricates compromising images/video and extorts payment to prevent circulation.
+11,Lottery / Prize Scam,Fake notifications of winning a lottery, lucky draw, or prize requiring an upfront processing fee.
+12,Phishing (Email/SMS/Voice),Deceptive messages or calls impersonating banks, e-commerce platforms, or government bodies to harvest credentials.
+13,Social Media Account Takeover,Unauthorized access to a victim's social media account, often used to scam their contacts.
+14,Cyberbullying / Online Harassment,Persistent online harassment, threats, or defamation directed at an individual.
+15,Counterfeit Currency Passing,Circulation of fake currency notes detected at point of transaction, adjacent to physical-fraud vectors.
+16,Ransomware / Malware,Malicious software encrypting or stealing data, typically demanding payment for restoration.
+17,Online Shopping / E-commerce Fraud,Fake e-commerce listings, non-delivery of goods, or fraudulent refund/replacement scams.
+18,Cryptocurrency Fraud,Fraudulent crypto exchanges, wallets, or mining schemes designed to misappropriate victim funds.
