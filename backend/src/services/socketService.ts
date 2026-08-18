@@ -16,8 +16,11 @@ let connectedClients = 0;
 export function initSocketIO(httpServer: HttpServer): SocketIOServer {
   _io = new SocketIOServer(httpServer, {
     cors: {
-      origin: true,
-      methods: ['GET', 'POST'],
+      origin: (_origin, callback) => {
+        // Reflect incoming origin to support production Vercel domain, previews, and localhost
+        callback(null, true);
+      },
+      methods: ['GET', 'POST', 'OPTIONS'],
       credentials: true,
     },
     pingTimeout: 60000,

@@ -16,7 +16,10 @@ export function createApp(): Application {
 
   // ── CORS ──
   app.use(cors({
-    origin: true,
+    origin: (_origin, callback) => {
+      // Reflect incoming origin to support production Vercel domain, previews, and localhost
+      callback(null, true);
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
