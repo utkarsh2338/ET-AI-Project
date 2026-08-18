@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapMarker } from '../../types';
+import { validateMarkerCoordinates } from '../../lib/geoValidator';
 
 interface FraudMapProps {
   markers: MapMarker[];
@@ -30,30 +31,6 @@ function getMarkerRadius(reportCount: number): number {
   if (reportCount > 150) return 18;
   if (reportCount > 50) return 14;
   return 10;
-}
-
-/**
- * Validates & autocorrects swapped lat/lng values for Indian geography.
- * Bounds: 6° N <= Latitude <= 38° N, 68° E <= Longitude <= 98° E
- */
-function validateAndCorrectCoordinate(rawLat: number, rawLng: number): { lat: number; lng: number; isValid: boolean } {
-  if (typeof rawLat !== 'number' || typeof rawLng !== 'number' || isNaN(rawLat) || isNaN(rawLng)) {
-    return { lat: 0, lng: 0, isValid: false };
-  }
-
-  let lat = rawLat;
-  let lng = rawLng;
-
-  // Detect and autocorrect swapped lat/lng (e.g. lat=77.5, lng=12.9)
-  if (lat > 50 && lng < 50) {
-    const temp = lat;
-    lat = lng;
-    lng = temp;
-  }
-
-  // Enforce geographical boundary check (6 <= lat <= 38, 68 <= lng <= 98)
-  const isValid = lat >= 6.0 && lat <= 38.0 && lng >= 68.0 && lng <= 98.0;
-  return { lat, lng, isValid };
 }
 
 export const FraudMap: React.FC<FraudMapProps> = ({
@@ -118,7 +95,7 @@ export const FraudMap: React.FC<FraudMapProps> = ({
     // Filter and process valid India coordinates
     const validMarkers = markers
       .map((m) => {
-        const check = validateAndCorrectCoordinate(m.latitude, m.longitude);
+        const check = validateMarkerCoordinates(m.latitude, m.longitude);
         return {
           ...m,
           latitude: check.lat,
@@ -234,7 +211,7 @@ export const FraudMap: React.FC<FraudMapProps> = ({
   // ── Fly To Selected District ──────────────────────────────────
   useEffect(() => {
     if (!mapRef.current || !selectedDistrict) return;
-    const check = validateAndCorrectCoordinate(selectedDistrict.latitude, selectedDistrict.longitude);
+    const check = validateMarkerCoordinates(selectedDistrict.latitude, selectedDistrict.longitude);
     if (check.isValid) {
       mapRef.current.flyTo([check.lat, check.lng], 8, {
         duration: 1.5,

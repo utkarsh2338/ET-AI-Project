@@ -12,6 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 import { logger } from '../utils/logger';
+import { isPointInIndia, validateCoordinates } from '../utils/geoValidator';
 
 export interface DistrictCoordinate {
   district: string;
@@ -66,15 +67,9 @@ export function initCoordinateService(): void {
 
       if (!dist || !state || isNaN(lat) || isNaN(lng)) return;
 
-      // Detect swapped lat/lng
-      if (lat > 50 && lng < 50) {
-        const temp = lat;
-        lat = lng;
-        lng = temp;
-      }
-
-      if (isWithinIndiaBounds(lat, lng)) {
-        const entry: DistrictCoordinate = { district: dist, state, latitude: lat, longitude: lng };
+      const check = validateCoordinates(lat, lng);
+      if (check.isValid) {
+        const entry: DistrictCoordinate = { district: dist, state, latitude: check.lat, longitude: check.lng };
         const fullKey = `${dist.toLowerCase()}|${state.toLowerCase()}`;
         benchmarkMap.set(fullKey, entry);
         if (!districtOnlyMap.has(dist.toLowerCase())) {
@@ -90,14 +85,11 @@ export function initCoordinateService(): void {
 }
 
 /**
- * Validates if coordinates fall within the geographical boundary of India.
- * Latitude: 6.0° N to 38.0° N, Longitude: 68.0° E to 98.0° E
+ * Validates if coordinates fall within the true geographical boundary of India
+ * using accurate Point-In-Polygon MultiPolygon geometry.
  */
 export function isWithinIndiaBounds(lat: number, lng: number): boolean {
-  if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
-    return false;
-  }
-  return lat >= 6.0 && lat <= 38.0 && lng >= 68.0 && lng <= 98.0;
+  return isPointInIndia(lat, lng);
 }
 
 /**
@@ -149,19 +141,10 @@ export function resolveDistrictCoordinates(
   }
 
   // 2. Validate provided raw coordinates
-  let lat = rawLat;
-  let lng = rawLng;
-
-  if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
-    // Detect swapped lat/lng
-    if (lat > 50 && lng < 50) {
-      const temp = lat;
-      lat = lng;
-      lng = temp;
-    }
-
-    if (isWithinIndiaBounds(lat, lng)) {
-      return { latitude: lat, longitude: lng, isBenchmark: false };
+  if (rawLat !== undefined && rawLng !== undefined) {
+    const check = validateCoordinates(rawLat, rawLng);
+    if (check.isValid) {
+      return { latitude: check.lat, longitude: check.lng, isBenchmark: false };
     }
   }
 
